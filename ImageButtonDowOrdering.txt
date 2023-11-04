@@ -1,0 +1,170 @@
+  <form id="form1" runat="server">
+        <div>
+        <asp:Label ID="Label1" runat="server" ForeColor="red" Text="Label"></asp:Label>
+        <br />
+        <br />
+            <asp:GridView ID="Gridviewselectbus" runat="server" Height="87px" Width="771px"
+                HorizontalAlign="Center" AutoGenerateColumns="False" OnRowCommand="Gridviewselectbus_RowCommand" CellPadding="4" ForeColor="#333333" GridLines="None">
+                <RowStyle BorderColor="#999999" HorizontalAlign="Center" VerticalAlign="Middle"
+                    Wrap="True" BackColor="#EFF3FB" />
+                <EmptyDataRowStyle BorderColor="#999999" />
+                <Columns>
+                    <asp:BoundField DataField="Lname" HeaderText="Lname" SortExpression="Lname" />
+                    <asp:BoundField DataField="Fname" HeaderText="Fname" SortExpression="Fname" />
+                    <asp:BoundField DataField="Job" HeaderText="Job" SortExpression="Job" />
+                    <asp:BoundField DataField="Index"  HeaderText="Index" SortExpression="Index" />
+                    <asp:TemplateField>
+                        <HeaderStyle Width="3%" />
+                        <ItemTemplate>
+                            <asp:ImageButton ID="ibtnUp" runat="server" border="0" CommandArgument='<%# Eval("index")%>'
+                                CommandName="Up" Height="18px" ImageUrl="images/btn_GreenUP.png" Width="18px" />
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField>
+                        <HeaderStyle Width="3%" />
+                        <ItemTemplate>
+                            <asp:ImageButton ID="ibtnDown" runat="server" border="0" CommandArgument='<%# Eval("index")%>'
+                                CommandName="Down" Height="18px" ImageUrl="images/btn_GreenDown.png" Width="18px" />
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+                <FooterStyle BackColor="#507CD1" Font-Bold="True" ForeColor="White" />
+                <PagerStyle BackColor="#2461BF" ForeColor="White" HorizontalAlign="Center" />
+                <SelectedRowStyle BackColor="#D1DDF1" Font-Bold="True" ForeColor="#333333" />
+                <HeaderStyle BackColor="#507CD1" Font-Bold="True" ForeColor="White" />
+                <EditRowStyle BackColor="#2461BF" />
+                <AlternatingRowStyle BackColor="White" />
+            </asp:GridView>
+        </div>
+    </form>
+
+
+
+
+<---------------------------> C# ---------------------------->
+
+public partial class _Default : System.Web.UI.Page
+{
+    public DataTable dt = new DataTable();
+    public DataTable dtnew = new DataTable();
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            bindgrid(); // Bind Gridview with sample data
+         }
+    }
+    private void bindgrid()
+    {
+        dt.Columns.Add("Fname");
+        dt.Columns.Add("Lname");
+        dt.Columns.Add("Job");
+        dt.Columns.Add("Index");
+        DataRow dr;
+        dr = dt.NewRow();
+        dr[0] = "ONE";
+        dr[1] = "User One";
+        dr[2] = "Manager";
+        dr[3] = 0;
+        dt.Rows.Add(dr);
+        dr = dt.NewRow();
+        dr[0] = "TWO";
+        dr[1] = "User Two";
+        dr[2] = "Project Lead";
+        dr[3] = 1;
+        dt.Rows.Add(dr);
+        dr = dt.NewRow();
+        dr[0] = "THREE";
+        dr[1] = "USer Three";
+        dr[2] = "Team Lead";
+        dr[3] = 2;
+        dt.Rows.Add(dr);
+        dr = dt.NewRow();
+        dr[0] = "FOUR";
+        dr[1] = "User Four";
+        dr[2] = "Module Lead";
+        dr[3] = 3;
+        dt.Rows.Add(dr);
+        dr = dt.NewRow();
+        dr[0] = "FIVE";
+        dr[1] = "User Five";
+        dr[2] = "Senior Developer";
+        dr[3] = 4;
+        dt.Rows.Add(dr);
+        dr = dt.NewRow();
+        dr[0] = "SIX";
+        dr[1] = "User Six";
+        dr[2] = "Developer";
+        dr[3] = 5;
+        dt.Rows.Add(dr);
+        dt.AcceptChanges();
+        Gridviewselectbus.DataSource = dt;
+        Gridviewselectbus.DataBind();
+        Session["dt"] = dt;
+    } 
+
+    protected void Gridviewselectbus_RowCommand(object sender, GridViewCommandEventArgs e)
+    {
+        if (e.CommandName == "Up")
+        {
+            int index = Convert.ToInt32(e.CommandArgument);
+            if (index == 0)
+            {
+                Label1.Text = "You Cant move recor' Up";
+                Label1.Visible = true;
+                return;
+            }
+            dt = (DataTable)Session["dt"];
+            int value = Convert.ToInt32(dt.Rows[index]["Index"].ToString());
+            dt.Rows[index]["Index"] = Convert.ToInt32(index) - 1;
+            dt.Rows[index - 1]["Index"] = value;// Convert.ToInt32(index);
+            dt.DefaultView.Sort = "Index";
+            dt.AcceptChanges();
+            dtnew = dt.Copy();
+            Gridviewselectbus.DataSource = dt;
+            Gridviewselectbus.DataBind();
+            dt.AcceptChanges();
+            for (int i = 0; i <= Gridviewselectbus.Rows.Count - 1; i++)
+            {
+                dtnew.Rows[i]["Lname"] = Gridviewselectbus.Rows[i].Cells[0].Text;
+                dtnew.Rows[i]["Job"] = Gridviewselectbus.Rows[i].Cells[1].Text;
+                dtnew.Rows[i]["Fname"] = Gridviewselectbus.Rows[i].Cells[2].Text;
+                dtnew.Rows[i]["Index"] = Gridviewselectbus.Rows[i].Cells[3].Text;
+            }
+            Session["dt"] = dtnew;
+            Label1.Text = string.Empty;
+        }
+        if (e.CommandName == "Down")
+        {
+            int index = Convert.ToInt32(e.CommandArgument);
+            dt = (DataTable)Session["dt"];
+            if (Convert.ToInt16(index + 1) == dt.Rows.Count)
+            {
+                Label1.Text = "You Cant move record down";
+                Label1.Visible = true;
+                return;
+            }
+            int value = Convert.ToInt32(dt.Rows[index]["Index"].ToString());
+            dt.Rows[index]["Index"] = Convert.ToInt32(dt.Rows[index]["Index"].ToString()) + 1;
+            dt.Rows[index + 1]["Index"] = value;
+            dt.AcceptChanges();
+            dt.DefaultView.Sort = "Index";
+            dt.AcceptChanges();
+            dtnew = dt.Copy();
+            Gridviewselectbus.DataSource = dt;
+            Gridviewselectbus.DataBind();
+            dt.AcceptChanges();
+            for (int i = 0; i <= Gridviewselectbus.Rows.Count - 1; i++)
+            {
+                dtnew.Rows[i]["Lname"] = Gridviewselectbus.Rows[i].Cells[0].Text;
+                dtnew.Rows[i]["Job"] = Gridviewselectbus.Rows[i].Cells[1].Text;
+                dtnew.Rows[i]["Fname"] = Gridviewselectbus.Rows[i].Cells[2].Text;
+                dtnew.Rows[i]["Index"] = Gridviewselectbus.Rows[i].Cells[3].Text;
+            }
+            Session["dt"] = dtnew;
+            Label1.Text = string.Empty;
+        }
+    }
+}
+
